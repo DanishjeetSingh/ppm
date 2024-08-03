@@ -1,0 +1,49 @@
+.\" Manpage for ppm
+.\" Contact danishjeetsingh@gmail.com
+.\" Date: 2024-08-02
+.TH PPM 1 "August 2024" "1.0" "ppm"
+.SH NAME
+ppm \- A script to run Python files and email the output
+.SH SYNOPSIS
+.B ppm
+[\fIoptions\fR] \fIpython_file\fR [\fIargs...\fR]
+.SH DESCRIPTION
+This script executes a Python file and sends an email with the output. The script also handles optional flags for displaying help or version information.
+.P
+The script reads the Python file specified and any additional arguments passed to it. It requires the \fIPPM_EMAIL\fR environment variable to be set for sending emails. It also checks for the presence of the \fImailx\fR command, which must be installed and properly configured.
+.SH OPTIONS
+.TP
+.B -h
+Display the help message and exit.
+.TP
+.B -v
+Display version information and exit.
+.SH ARGUMENTS
+.TP
+\fIpython_file\fR
+The path to the Python file to execute.
+.TP
+\fIargs...\fR
+Additional arguments to pass to the Python script.
+.SH ENVIRONMENT VARIABLES
+.TP
+.B PPM_EMAIL
+The email address to send the output to.
+.SH REQUIREMENTS
+.TP
+.B mailx
+The \fImailx\fR command must be installed and properly configured to send emails.
+.SH EXAMPLES
+To display the help message:
+.P
+.B ppm -h
+.P
+To display version information:
+.P
+.B ppm -v
+.P
+To execute a Python file with arguments:
+.P
+.B ppm myscript.py arg1 arg2
+.SH AUTHOR
+Danishjeet Singh <danishjeetsingh@gmail.com>
