@@ -7,10 +7,8 @@ fi
 
 python_file="$1"
 shift
-
 additional_args="$@"
 
-# make sure you set this variable in your OS
 recipient_email="$PPM_EMAIL"
 
 if [ -z "$recipient_email" ]; then
@@ -18,32 +16,24 @@ if [ -z "$recipient_email" ]; then
     exit 1
 fi
 
-output=$(python "$python_file" "$@" 2>&1)
+temp_output=$(mktemp)
 
-echo "$output"
+python "$python_file" "$@" 2>&1 | tee "$temp_output"
+exit_status=${PIPESTATUS[0]}
 
-exit_status=$?
+output=$(cat "$temp_output")
 
-if [ $exit_status -eq 0 ]; then
-    subject="Success: Output of $python_file"
-else
-    subject="Error: Output of $python_file"
-fi
+rm "$temp_output"
 
-# if your python script is building a log file and you want it in your email.
-log_file=$(echo "$output" | grep -oP 'Log file: \K.*')
+subject=$( [ $exit_status -eq 0 ] && echo "Success: $python_file $additional_args" || echo "Error: $python_file $additional_args" )
+
+log_file=$(echo "$output" | tac | grep -oP '\S+\.log' | head -n 1)
 
 if [ -f "$log_file" ]; then
-    log_content=$(cat "$log_file")
-    email_content="$output\n\n$log_content"
+    echo -e "$output" | mailx -s "$subject" -A "$log_file" "$recipient_email"
 else
-    email_content="$output"
+    if [ -n "$log_file" ]; then
+        output="$output\n\nWarning: Log file path found but the file does not exist: $log_file"
+    fi
+    echo -e "$output" | mailx -s "$subject" "$recipient_email"
 fi
-
-
-if [ ! -z "$additional_args" ]; then
-    email_content="$email_content\n\nAdditional arguments: $additional_args"
-fi
-
-# Additionaly you could put some error handling for the `mail` command, I have it setup already so it works for me just fine!
-echo -e "$email_content" | mail -s "$subject" "$recipient_email"
